@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './estilos.css'
 import './editorial.css'
+import './dinamica.css'
 import App from './App.jsx'
 
 if (!document.documentElement.getAttribute('data-theme')) {
