@@ -1,0 +1,109 @@
+.barra-navegacion {
+  background-color: var(--verde);
+  color: white;
+  padding: 0.75rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+[data-theme='oscuro'] .barra-navegacion {
+  background-color: var(--verde-oscuro, #046a33);
+}
+
+.barra-contenido {
+  /* Más ancho que el 1080px del contenido: con 9 enlaces + identidad + salida,
+     1080 dejaba los últimos (Mapa, Regiones, Histórico) fuera de pantalla. El
+     scroll de .barra-enlaces sigue siendo el respaldo en pantallas angostas. */
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.barra-enlaces {
+  display: flex;
+  list-style: none;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  /* min-width:0 es lo que permite que el flex item ENCOJA por debajo del ancho de su
+     contenido. Sin él, los 10 enlaces desbordan el max-width del contenedor y empujan
+     el bloque de sesión fuera de la pantalla. */
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  /* SEÑAL DE QUE HAY MÁS. La barra de scroll está oculta (justo abajo), así que sin esto
+     no queda NINGUNA pista de que la lista se desplaza: en táctil el usuario no descubre
+     los ítems de la derecha porque nada le dice que existen.
+
+     Son dos degradados anclados al borde con `background-attachment: local, scroll`: el
+     truco clásico de sombras de scroll. La capa `local` se desplaza con el contenido y
+     tapa la sombra cuando ya no hay nada más; la capa `scroll` queda fija en el borde.
+     Resultado: la sombra aparece solo del lado donde queda contenido oculto. */
+  background:
+    linear-gradient(to right, var(--verde) 30%, rgba(5, 131, 63, 0)) left center,
+    linear-gradient(to left, var(--verde) 30%, rgba(5, 131, 63, 0)) right center,
+    linear-gradient(to right, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0)) left center,
+    linear-gradient(to left, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0)) right center;
+  background-repeat: no-repeat;
+  background-size: 28px 100%, 28px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.barra-enlaces::-webkit-scrollbar {
+  display: none;
+}
+
+.barra-enlaces > li {
+  flex-shrink: 0;
+}
+
+.barra-enlace {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  /* 0.95 y no 0.8: compuesto sobre --verde #05833f, el 0.8 daba 3,68:1 con texto de
+     14 px normal, bajo el 4,5:1 que exige WCAG 1.4.3. A 0.95 da 4,54:1. (0.92 tampoco
+     alcanza: 4,36:1.) Afecta a 8 de los 9 enlaces, que son el elemento más usado. */
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.barra-enlace:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.barra-enlace.activo {
+  color: white;
+  border-bottom-color: white;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .barra-contenido {
+    gap: 0.5rem;
+  }
+
+  .barra-enlace span {
+    display: none;
+  }
+
+  .barra-enlaces {
+    gap: 0;
+  }
+
+  .barra-enlace {
+    padding: 0.5rem;
+  }
+}

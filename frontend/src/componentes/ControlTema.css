@@ -1,0 +1,72 @@
+/* Control de tema en la barra de navegación.
+   Vive sobre el verde de la barra, así que sus colores son propios y no tokens de
+   superficie: --tarjeta o --tinta aquí darían un bloque claro flotando sobre el verde. */
+
+.control-tema {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+}
+
+.control-tema-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  /* Blanco al 80 % sobre el verde de la barra: legible sin competir con el ítem activo. */
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.control-tema-boton:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.control-tema-boton.activo {
+  background: #fff;
+  /* Verde institucional sobre blanco: 10,3:1. El estado activo no se marca SOLO con
+     color —también cambia el fondo—, para que se distinga sin percibir el matiz. */
+  color: var(--color-institucional);
+}
+
+.control-tema-boton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* Solo iconos por debajo de 1400. El umbral es alto a propósito: con etiquetas el control
+   mide ~230 px y en un portátil de 1366 empujaba los 9 ítems de navegación al scroll,
+   dejando «Histórico» cortado. Medido en captura, no supuesto.
+   La etiqueta se va, pero el `title` y el aria-label del grupo siguen describiendo el
+   control, y el estado activo se distingue por el fondo blanco, no solo por color. */
+@media (max-width: 1399.98px) {
+  .control-tema-etiqueta {
+    display: none;
+  }
+
+  .control-tema-boton {
+    padding: 5px 7px;
+  }
+}
+
+@media (pointer: coarse) {
+  .control-tema-boton {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+  }
+}

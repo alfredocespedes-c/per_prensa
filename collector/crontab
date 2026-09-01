@@ -1,0 +1,22 @@
+# Cron del collector dentro del contenedor (ejecutado por supercronic, ver
+# docker-entrypoint.sh). Corre cada hora EN PUNTO (minuto :00). supercronic ya reenvía
+# el stdout/stderr del comando a su propio stdout (visible con `docker compose logs`).
+#
+# timeout -s KILL 55m: backstop de duración. Acota cada corrida a <60 min, de modo que
+# (a) una corrida colgada o muy lenta se mata antes del siguiente tick y NUNCA se
+# solapan dos procesos compitiendo por datos/noticias.json, y (b) la cadencia horaria
+# se mantiene aunque una corrida se degrade. SIGKILL porque un cuelgue síncrono (regex,
+# etc.) ignora SIGTERM.
+0 * * * * cd /app/collector && timeout -s KILL 55m node src/main.js --salida /app/collector/datos/noticias.json --historico /app/collector/datos/historico.json
+#
+# Purga de retención (política en collector/src/dominio/retencion.js): vacía el texto de
+# las noticias que superan RETENCION_EXTRACTO_DIAS y borra las que superan
+# RETENCION_METADATOS_DIAS.
+#
+# 06:30 UTC = 02:30/03:30 en Chile según horario de verano. Es el hueco entre dos
+# corridas horarias y está MUY lejos de la ventana 07:00-09:00 de Chile en que SECOM
+# revisa el boletín: la purga toma locks de escritura sobre `noticias` y no debe
+# coincidir con la lectura de la portada a esa hora. El contenedor corre en UTC.
+#
+# --aplicar es obligatorio: sin él, purga.js solo simula (ver su cabecera).
+30 6 * * * cd /app/collector && timeout -s KILL 50m node src/purga.js --aplicar

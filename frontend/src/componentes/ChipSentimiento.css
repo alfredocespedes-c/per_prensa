@@ -1,0 +1,27 @@
+/* Chip de tono, derivado de los tokens --sent-*.
+   El fondo se calcula con color-mix sobre la superficie de la tarjeta, así que en tema
+   claro da un pastel y en oscuro un tinte oscuro, SIN una segunda paleta que mantener. */
+
+.chip-sentimiento {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* --tono lo fija cada variante de abajo. */
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 16%, var(--tarjeta));
+  border: 1px solid color-mix(in srgb, var(--tono) 32%, var(--tarjeta));
+}
+
+.chip-sentimiento-positiva { --tono: var(--sent-positiva); }
+.chip-sentimiento-neutra { --tono: var(--sent-neutra); }
+.chip-sentimiento-negativa { --tono: var(--sent-negativa); }
+.chip-sentimiento-mixta { --tono: var(--sent-mixta); }
+
+/* En claro, --sent-neutra (#aab4ae) sobre un fondo casi blanco da ~2:1: no alcanza AA para
+   texto. Se oscurece SOLO el texto del chip neutro, dejando el token intacto para el
+   filete lateral de la tarjeta, donde es un indicador gráfico y no texto. */
+:root:not([data-theme='oscuro']) .chip-sentimiento-neutra {
+  color: var(--gris);
+}

@@ -1,0 +1,40 @@
+# Actualizaciones automáticas de dependencias (SEC-14).
+# Los updates menores/parche se agrupan en un solo PR para reducir ruido;
+# los majors llegan en PR propio. El ecosistema github-actions también
+# actualiza los pins a SHA de ci.yml (incluido el reusable workflow).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - "/collector"
+      - "/frontend"
+    schedule:
+      interval: weekly
+    groups:
+      menores:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: pip
+    directory: "/backend"
+    schedule:
+      interval: weekly
+    groups:
+      menores:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directories:
+      - "/backend"
+      - "/collector"
+      - "/frontend"
+    schedule:
+      interval: weekly

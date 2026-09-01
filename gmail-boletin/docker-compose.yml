@@ -1,0 +1,29 @@
+# Uso:  cp .env.example .env  &&  (rellenar)  &&  docker compose up --build
+#
+# Los secretos NO están acá: llegan por env_file, que apunta a un archivo ignorado por
+# git. Este archivo sí se versiona, así que no puede contener ningún valor real.
+
+services:
+  gmail-boletin:
+    build: .
+    image: gmail-boletin:local
+    # Todas las variables (credenciales incluidas) salen de .env.
+    env_file:
+      - .env
+    environment:
+      # Respaldo por si .env no fija TZ: la aplicación necesita una zona válida para
+      # formatear las fechas.
+      TZ: ${TZ:-America/Santiago}
+    # "no" y no "unless-stopped": por defecto esto es un trabajo de una pasada que
+    # termina. Con `restart: unless-stopped` Docker lo relanzaría en bucle apenas
+    # terminara bien. Para ejecución periódica, use GMAIL_INTERVALO_SEGUNDOS (el proceso
+    # se queda vivo durmiendo) y entonces sí conviene cambiarlo a unless-stopped.
+    restart: "no"
+    # Endurecimiento: la aplicación solo lee correo, no escribe nada en disco.
+    read_only: true
+    # read_only bloquea TODA escritura; algunas bibliotecas de TLS/HTTP esperan poder
+    # usar /tmp. Un tmpfs se lo da sin abrir el resto del sistema de archivos.
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

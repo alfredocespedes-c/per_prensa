@@ -1,0 +1,1740 @@
+/* Monitor de Prensa CONAF — portal de tarjetas.
+   Conserva el espíritu del boletín (verde institucional, secciones, recencia,
+   mención resaltada) con identidad propia: tarjetas modernas y grilla responsive. */
+
+:root {
+  --verde: #05833f;
+  --verde-oscuro: #046a33;
+  --verde-muy-claro: #e6f4ec;
+  --tinta: #1f2a24;
+  --gris: #5b6560;
+  --gris-tenue: #8a938e;
+  --linea: #e3e6e8;
+  --fondo: #f5f7f6;
+  --tarjeta: #ffffff;
+  --resaltado: #ffe58a;
+  /* Paleta de sentimiento (filete lateral de las tarjetas) */
+  --sent-positiva: #1e7a4a;
+  --sent-neutra: #aab4ae;
+  --sent-negativa: #b3402a;
+  --sent-mixta: #c08a2d;
+  /* Identidad del banner institucional (INSUMO_GRAFICO/banner3.jpg). NO reemplazan a
+     --verde: la barra de navegación, los botones, los gráficos y el favicon siguen en
+     #05833f. Es una decisión explícita, no un olvido: no "arreglar" propagándolos. */
+  --color-institucional: #064928;
+  --color-acento: #5e8f19;
+  /* Rampa secuencial del mapa coroplético. --mapa-0 ("sin noticias") es un gris CÁLIDO
+     a propósito: difiere de la rampa en TONO, no solo en luminosidad, y encima lleva
+     trama diagonal. Doble codificación, para que se distinga del nivel 1 aunque la
+     región sea diminuta. */
+  --mapa-0: #e4ded5;
+  --mapa-1: #dcefe3;
+  --mapa-2: #a9d9bf;
+  --mapa-3: #6ec394;
+  --mapa-4: #2e9c66;
+  --mapa-5: #0a6b3a;
+  --mapa-borde: #ffffff;
+  /* Padding de las vistas. Varias lo tenían como `padding: '2rem'` INLINE y por eso
+     ignoraban la media query de `.vista`: un estilo inline no admite breakpoint. */
+  --pad-vista: 2rem;
+  /* Alto de la barra de navegación sticky. Lo usan el `top` del índice de conceptos y el
+     `scroll-margin-top` de los bloques: antes era un 64 suelto en dos reglas distintas. */
+  --alto-barra-navegacion: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--tinta);
+  background: var(--fondo);
+  line-height: 1.5;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* La cabecera blanca de la portada (.cabecera / .marca / .actualizado) se eliminó junto
+   con componentes/Cabecera.jsx: el título y la fecha viven ahora DENTRO del banner
+   institucional, como en la maqueta aprobada. Ver BannerInstitucional.jsx/.css. */
+
+/* ---- Contenido y secciones ---- */
+
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 8px 24px 32px;
+}
+
+/* ---- Boletín del servicio contratado (Simbiu MediaStation) ----
+   Va ARRIBA del boletín propio y solo con sesión. Es SOLO un enlace: acá no hay ni
+   puede haber ninguna regla de imagen, ni un `background-image`, ni un iframe.
+
+   Sin tokens nuevos a propósito: todos los que usa ya existen en :root y —los que lo
+   necesitan— en los DOS bloques de tema oscuro, así que tema-coherente.test.js queda
+   verde por construcción y no hay que tocar esos bloques (cuyas regex dependen de la
+   indentación literal). */
+.boletin-contratado {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: var(--tarjeta);
+  border: 1px solid var(--linea);
+  /* Filete lateral verde: lo distingue del boletín propio sin gritar. */
+  border-left: 4px solid var(--verde);
+  border-radius: 8px;
+}
+
+/* El último registrado NO es el de hoy: se marca en ámbar, el mismo criterio cromático
+   que .retiro-estado-pendiente. Nunca se oculta el enlace: sigue siendo útil. */
+.boletin-contratado-desactualizado {
+  border-left-color: var(--sent-mixta);
+}
+
+.boletin-contratado-rotulo {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gris-tenue);
+}
+
+.boletin-contratado-fecha {
+  margin: 2px 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.boletin-contratado-total {
+  margin-left: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gris-tenue);
+}
+
+/* Secciones del boletín del proveedor: concepto + tipo de medio, plegadas. */
+.boletin-contratado-secciones {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--linea);
+}
+
+.boletin-contratado-seccion {
+  border-bottom: 1px solid var(--linea);
+}
+
+.boletin-contratado-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 2px;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--tinta);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.boletin-contratado-cabecera:hover {
+  color: var(--verde-oscuro);
+}
+
+.boletin-contratado-concepto {
+  font-weight: 600;
+}
+
+.boletin-contratado-tipo {
+  color: var(--gris);
+}
+
+/* La cuenta va al final y separada: es lo que deja ver la forma del día sin desplegar. */
+.boletin-contratado-cuenta {
+  margin-left: auto;
+  min-width: 28px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--verde-oscuro);
+  text-align: center;
+  background: var(--verde-muy-claro);
+  border-radius: 999px;
+}
+
+.boletin-contratado-noticias {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0 0 0 23px;
+}
+
+.boletin-contratado-noticia {
+  padding: 6px 0;
+  border-top: 1px solid var(--linea);
+}
+
+.boletin-contratado-noticia a {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.boletin-contratado-noticia a:hover {
+  color: var(--verde-oscuro);
+  text-decoration: underline;
+}
+
+.boletin-contratado-atribucion {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.76rem;
+  color: var(--gris-tenue);
+}
+
+.boletin-contratado-enlace-completo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--verde-oscuro);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.boletin-contratado-nota {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--gris);
+}
+
+.boletin-contratado-aviso {
+  margin: 18px 0 0;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--gris);
+  background: var(--verde-muy-claro);
+  border: 1px dashed var(--linea);
+  border-radius: 8px;
+}
+
+.boletin-contratado-accion {
+  color: var(--verde-oscuro);
+  font-weight: 600;
+}
+
+/* Barra de filtros: control de período + leyenda de sentimiento */
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+  margin-top: 18px;
+}
+
+/* Control segmentado de período (Todas / Hoy / Hoy y ayer) */
+.filtro-periodo {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--verde-muy-claro);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+}
+
+/* Leyenda del filete lateral */
+.leyenda-sentimiento {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--gris-tenue);
+}
+
+.leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.leyenda-punto {
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.leyenda-punto.positiva { background: var(--sent-positiva); }
+.leyenda-punto.neutra { background: var(--sent-neutra); }
+.leyenda-punto.negativa { background: var(--sent-negativa); }
+.leyenda-punto.mixta { background: var(--sent-mixta); }
+
+.filtro-periodo-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.filtro-periodo-boton:hover {
+  color: var(--verde);
+}
+
+.filtro-periodo-boton.activo {
+  background: var(--verde);
+  color: #fff;
+}
+
+.filtro-periodo-conteo {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.filtro-periodo-boton.activo .filtro-periodo-conteo {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.seccion {
+  margin-top: 28px;
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding-left: 11px;
+  border-left: 4px solid var(--verde);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--verde);
+}
+
+.conteo-seccion {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gris);
+  background: var(--verde-muy-claro);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+
+.grilla-noticias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+/* ---- Tarjeta de noticia ---- */
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  background: var(--tarjeta);
+  border: 1px solid var(--linea);
+  /* Filete lateral: el borde izquierdo lleva el color del sentimiento. */
+  border-left: 4px solid var(--sent-neutra);
+  border-radius: 10px;
+  overflow: hidden;
+  /* Sin esto, la pista de grilla no baja del min-content del contenido y una
+     palabra/nombre largo desborda el viewport en móvil. */
+  min-width: 0;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.tarjeta:hover {
+  box-shadow: 0 6px 18px rgba(5, 131, 63, 0.1);
+  transform: translateY(-2px);
+}
+
+.tarjeta.sentimiento-positiva { border-left-color: var(--sent-positiva); }
+.tarjeta.sentimiento-neutra { border-left-color: var(--sent-neutra); }
+.tarjeta.sentimiento-negativa { border-left-color: var(--sent-negativa); }
+.tarjeta.sentimiento-mixta { border-left-color: var(--sent-mixta); }
+
+/* La tarjeta pública no lleva filete de tono: el borde queda neutro. */
+.tarjeta.tarjeta-publica {
+  border-left-color: var(--linea);
+}
+
+/* Acá vivían ~100 líneas de tratamiento de imágenes: .tarjeta-imagen (16:9 en la vista
+   interna), la miniatura de 120 px con su crédito para la portada pública, y el monograma
+   con la inicial del medio que aparecía cuando la nota no traía foto. Se eliminaron con
+   la cadena completa —el collector ya no extrae el og:image y la columna salió de la
+   base—, por decisión del departamento legal. La tarjeta es de solo texto.
+
+   El 16 de padding-top (era 14) es el aire superior de toda la tarjeta ahora que no hay
+   bloque visual encima del que separar el texto. */
+.tarjeta-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.tarjeta-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.chip-medio {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--verde);
+  background: var(--verde-muy-claro);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 70%;
+  /* El nombre del medio NO se encoge. Es la atribución, que es lo que no puede
+     degradarse: al añadir la marca de "hoy" empezó a truncarse a "LA TERCE…" y lo que
+     cede es la fecha relativa, no el crédito al medio. */
+  flex-shrink: 0;
+}
+
+.tarjeta-meta-derecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  /* Este bloque sí cede espacio, y la fecha se recorta antes que el medio. */
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+.tarjeta-fecha {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-hoy,
+.chip-ambito {
+  flex-shrink: 0;
+}
+
+/* Ámbito de la noticia (nacional / regional / internacional) */
+.chip-ambito {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.chip-ambito.ambito-nacional {
+  color: var(--verde);
+  background: var(--verde-muy-claro);
+}
+
+.chip-ambito.ambito-regional {
+  color: var(--gris);
+  background: color-mix(in srgb, var(--gris) 12%, transparent);
+}
+
+.chip-ambito.ambito-internacional {
+  color: #3d5a80;
+  background: rgba(61, 90, 128, 0.12);
+}
+
+[data-theme='oscuro'] .chip-ambito.ambito-internacional {
+  color: #8fb3d9;
+  background: rgba(143, 179, 217, 0.14);
+}
+
+.tarjeta-fecha {
+  font-size: 12px;
+  color: var(--gris-tenue);
+  white-space: nowrap;
+}
+
+.tarjeta-titular {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tinta);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta-titular:hover {
+  color: var(--verde);
+  text-decoration: underline;
+}
+
+.tarjeta-extracto {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gris);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta-extracto mark {
+  background: var(--resaltado);
+  color: var(--tinta);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* ---- Estados y pie ---- */
+
+.estado {
+  max-width: 1080px;
+  margin: 60px auto;
+  padding: 0 24px;
+  text-align: center;
+  color: var(--gris);
+}
+
+.estado-error {
+  color: #b23b3b;
+}
+
+.pie {
+  border-top: 3px solid var(--verde);
+  /* var(--tarjeta) y no #fff: el pie ahora se renderiza en TODAS las rutas, así que un
+     blanco fijo se veía como una franja encendida al pie de cada vista en tema oscuro. */
+  background: var(--tarjeta);
+  padding: 18px 24px 26px;
+  font-size: 12px;
+  color: var(--gris-tenue);
+  text-align: center;
+  margin-top: auto;
+}
+
+.pie-marca {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--verde);
+  margin-right: 8px;
+}
+
+.pie-linea {
+  margin: 0 auto 6px;
+  max-width: 780px;
+  line-height: 1.55;
+}
+
+.pie-linea:last-child {
+  margin-bottom: 0;
+}
+
+/* La leyenda de propiedad no es letra chica decorativa: es la que declara de quién es
+   el contenido. Se lee igual que el resto del pie, no más apagada. */
+.pie-atribucion {
+  color: var(--gris);
+}
+
+.pie a {
+  color: var(--verde);
+}
+
+/* Autoría de la nota, junto al titular: atribución, nunca un criterio de filtrado. */
+.tarjeta-autor {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gris);
+  font-style: italic;
+}
+
+/* El tono sale de un léxico, no de una revisión humana: decirlo evita que se lea como
+   una calificación institucional del medio. */
+.leyenda-aviso {
+  font-size: 11px;
+  color: var(--gris-tenue);
+  font-style: italic;
+}
+
+/* ---- Índice de conceptos ----
+   Sticky bajo la barra de navegación: con muchos conceptos, el índice sirve justo cuando
+   ya se bajó por el boletín, así que desaparecer al hacer scroll lo volvería inútil. */
+.indice-conceptos {
+  position: sticky;
+  /* Descuenta la barra de navegación, que también es sticky en top:0 y con z-index 100.
+     Con top:0 aquí, el índice se deslizaba POR DEBAJO de la barra y desaparecía justo
+     cuando hace falta: al bajar por el boletín. El 64 es coherente con el
+     `scroll-margin-top` de .bloque-concepto, que ya asumía esa altura. */
+  top: var(--alto-barra-navegacion, 64px);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0;
+  margin-bottom: 4px;
+  background: var(--fondo);
+  border-bottom: 1px solid var(--linea);
+}
+
+.indice-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: var(--tarjeta);
+  color: var(--tinta);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.indice-chip:hover,
+.indice-chip:focus-visible {
+  border-color: var(--verde);
+  color: var(--verde-oscuro);
+}
+
+.indice-cuenta {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--verde);
+  border-radius: 999px;
+  padding: 0 6px;
+}
+
+/* El bloque no debe quedar tapado por el índice sticky al saltar hacia él. */
+.bloque-concepto {
+  scroll-margin-top: var(--alto-barra-navegacion, 64px);
+}
+
+/* ---- Marca de "hoy" ----
+   SECOM revisa a las 08:00 y necesita distinguir lo del día dentro de una ventana que
+   arrastra semanas. Se marca con TEXTO además del color: un distintivo solo cromático
+   deja fuera a quien no lo distingue y desaparece en una proyección. */
+.chip-hoy {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--verde);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.tarjeta-de-hoy {
+  box-shadow: 0 0 0 1px var(--verde) inset;
+}
+
+/* Nivel 1 del boletín: el concepto de búsqueda. Se distingue del título de sección
+   (nivel 2) por tamaño y por el filete superior, para que la jerarquía se lea de un
+   vistazo y no parezca una sección más. */
+.titulo-concepto {
+  margin: 28px 0 4px;
+  padding-top: 14px;
+  border-top: 2px solid var(--verde);
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--verde-oscuro);
+}
+
+.bloque-concepto:first-of-type .titulo-concepto {
+  margin-top: 8px;
+}
+
+/* ---- Jerarquía de conceptos (orden del boletín) ---- */
+
+.lista-ordenable {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ordenable-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--linea);
+  border-radius: 7px;
+  background: var(--tarjeta);
+}
+
+.ordenable-arrastrando {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.ordenable-asa {
+  color: var(--gris-tenue);
+  cursor: grab;
+  padding-top: 2px;
+}
+
+.ordenable-contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+.ordenable-flechas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ordenable-flechas button {
+  border: 1px solid var(--linea);
+  background: var(--tarjeta);
+  color: var(--tinta);
+  border-radius: 4px;
+  padding: 1px 3px;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.ordenable-flechas button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.jerarquia {
+  margin-bottom: 1.5rem;
+}
+
+.jerarquia-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--tinta);
+  cursor: pointer;
+  text-align: left;
+}
+
+.jerarquia-conteo {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--gris-tenue);
+}
+
+.jerarquia-concepto .lista-ordenable {
+  margin-top: 8px;
+  padding-left: 14px;
+  border-left: 2px solid var(--linea);
+}
+
+.jerarquia-tipo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.jerarquia-tipo-oculto {
+  color: var(--gris-tenue);
+  text-decoration: line-through;
+}
+
+/* ---- Bandeja de solicitudes de retiro ---- */
+
+.retiro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.retiro-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.retiro-estado {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid var(--linea);
+}
+
+.retiro-estado-aplicado { color: #b3402a; border-color: #b3402a; }
+.retiro-estado-pendiente { color: #c08a2d; border-color: #c08a2d; }
+.retiro-estado-rechazado { color: var(--gris-tenue); }
+
+.retiro-ambito,
+.retiro-fecha,
+.retiro-dato {
+  color: var(--gris-tenue);
+  margin: 0;
+  font-size: 12px;
+}
+
+.retiro-motivo {
+  margin: 0;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.retiro-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.retiro-acciones button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--linea);
+  background: var(--tarjeta);
+  color: var(--tinta);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ---- Formulario de solicitud de retiro ---- */
+
+.formulario-retiro {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 560px;
+}
+
+.formulario-retiro fieldset {
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  padding: 12px 14px 14px;
+  margin: 0;
+}
+
+.formulario-retiro legend {
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris);
+}
+
+.opcion-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.campo input,
+.campo textarea {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--linea);
+  border-radius: 7px;
+  background: var(--tarjeta);
+  color: var(--tinta);
+}
+
+.campo input:focus-visible,
+.campo textarea:focus-visible {
+  outline: 2px solid var(--verde);
+  outline-offset: 1px;
+}
+
+.campo small {
+  font-size: 12px;
+  color: var(--gris-tenue);
+}
+
+.formulario-retiro button[type='submit'] {
+  align-self: flex-start;
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.formulario-retiro button[type='submit']:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---- Contenedor común de las vistas internas ----
+   Reemplaza el `style={{padding:'2rem', maxWidth:'1200px', margin:'0 auto'}}` que
+   estaba copiado en cada vista. */
+
+.vista {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.vista h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.vista-bajada {
+  margin: 0 0 1.5rem;
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.estado-vacio {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--gris-tenue);
+}
+
+/* ---- Eventos ---- */
+
+.grilla-eventos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.tarjeta-evento {
+  background: var(--tarjeta);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+/* Una tarjeta desplegada dentro de una grilla auto-fill dejaría el resto de su fila
+   desalineado; ocupando la fila completa el listado no se descoloca. */
+.tarjeta-evento[data-expandido='true'] {
+  grid-column: 1 / -1;
+  border-color: var(--verde);
+  box-shadow: 0 6px 18px rgba(5, 131, 63, 0.1);
+}
+
+.tarjeta-evento-titulo {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.tarjeta-evento-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tarjeta-evento-cabecera:hover span:first-child {
+  color: var(--verde);
+}
+
+.tarjeta-evento-cabecera:focus-visible {
+  outline: 2px solid var(--verde);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.tarjeta-evento-chevron {
+  flex: none;
+  margin-top: 2px;
+  color: var(--gris-tenue);
+  transition: transform 0.15s;
+}
+
+.tarjeta-evento[data-expandido='true'] .tarjeta-evento-chevron {
+  transform: rotate(180deg);
+}
+
+.tarjeta-evento-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.chip-importancia {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background: var(--verde-muy-claro);
+  color: var(--verde);
+  font-weight: 500;
+}
+
+.tarjeta-evento-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: var(--gris);
+}
+
+.tarjeta-evento-fecha {
+  margin-left: auto;
+  color: var(--gris-tenue);
+  font-size: 0.75rem;
+  align-self: center;
+}
+
+.tarjeta-evento-panel {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--linea);
+}
+
+.enlace-evento {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--verde);
+  text-decoration: none;
+}
+
+.enlace-evento:hover {
+  text-decoration: underline;
+}
+
+.enlace-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--gris);
+  text-decoration: none;
+}
+
+.enlace-volver:hover {
+  color: var(--verde);
+}
+
+.detalle-evento-titulo {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.detalle-evento-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.detalle-evento-cifras {
+  font-size: 0.875rem;
+  color: var(--gris);
+}
+
+.detalle-evento-medios {
+  margin: 0.75rem 0 1.75rem;
+  font-size: 0.8rem;
+  color: var(--gris-tenue);
+}
+
+/* ---- Mapa y regiones ---- */
+
+.mapa-disposicion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.mapa-ranking h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gris-tenue);
+}
+
+.mapa-ranking ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mapa-ranking button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mapa-ranking button:hover {
+  background: var(--verde-muy-claro);
+}
+
+.mapa-ranking button:focus-visible {
+  outline: 2px solid var(--verde);
+  outline-offset: -2px;
+}
+
+.mapa-ranking-cifra {
+  font-weight: 700;
+  color: var(--verde);
+}
+
+.mapa-ranking-cifra.cero {
+  color: var(--gris-tenue);
+  font-weight: 400;
+}
+
+.regiones-mapa {
+  max-width: 420px;
+  margin: 1.5rem auto 2rem;
+}
+
+.grilla-regiones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.tarjeta-region {
+  display: block;
+  width: 100%;
+  padding: 1.25rem;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--tarjeta);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.tarjeta-region:hover {
+  border-color: var(--verde);
+  box-shadow: 0 6px 18px rgba(5, 131, 63, 0.1);
+  transform: translateY(-2px);
+}
+
+.tarjeta-region:focus-visible {
+  outline: 2px solid var(--verde);
+  outline-offset: 2px;
+}
+
+/* Las regiones sin noticias se muestran igual (el coroplético las pinta, la grilla
+   no puede fingir que no existen), pero atenuadas. */
+.tarjeta-region.sin-noticias {
+  opacity: 0.6;
+}
+
+.tarjeta-region h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.tarjeta-region-cifra {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--verde);
+}
+
+.tarjeta-region.sin-noticias .tarjeta-region-cifra {
+  color: var(--gris-tenue);
+}
+
+.tarjeta-region-pie {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--gris-tenue);
+}
+
+.tarjeta-region-categorias {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.tarjeta-region-categorias li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--linea);
+  font-size: 0.75rem;
+  color: var(--gris);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 900px) {
+  .mapa-disposicion {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .vista {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .grilla-eventos {
+    grid-template-columns: 1fr;
+  }
+
+
+  .contenido {
+    padding: 8px 16px 28px;
+  }
+
+
+  .grilla-noticias {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* ---- Modo oscuro ---- */
+
+[data-theme='oscuro'] {
+  --tinta: #e8eae6;
+  --gris: #a9ada8;
+  --gris-tenue: #757975;
+  --linea: #2c3530;
+  --fondo: #1a1f1c;
+  --tarjeta: #232b27;
+  --resaltado: #664d1a;
+  --verde-muy-claro: #1d3529;
+  --sent-positiva: #3fa874;
+  --sent-neutra: #3d4a43;
+  --sent-negativa: #d0654b;
+  --sent-mixta: #d9a84e;
+  /* En oscuro la rampa ARRANCA oscura y sube: invertida deslumbraría sobre #1a1f1c. */
+  --mapa-0: #3a352d;
+  /* --mapa-1 tiene que separarse del fondo (#1a1f1c), no solo del nivel 2: con
+     #1f3b2c una región de 1 noticia se confundía con el hueco de la página. */
+  --mapa-1: #26493a;
+  --mapa-2: #316548;
+  --mapa-3: #40895e;
+  --mapa-4: #57ae7a;
+  --mapa-5: #80d4a0;
+  /* Borde MÁS oscuro que el fondo: en claro separa por blanco, en oscuro por sombra.
+     Igualarlo al fondo fundía las regiones vecinas de valores parecidos. */
+  --mapa-borde: #11150f;
+}
+
+[data-theme='oscuro'] body {
+  color: var(--tinta);
+  background: var(--fondo);
+}
+
+[data-theme='oscuro'] .estado,
+[data-theme='oscuro'] .estado-error {
+  background: var(--tarjeta);
+  color: var(--tinta);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='claro']) {
+    /* SINCRONIZADO con el bloque [data-theme='oscuro']. La rampa del mapa había
+       divergido: esta copia conservaba #1f3b2c para --mapa-1, el valor que el
+       comentario de allá declara MALO por confundirse con el fondo. La duplicación
+       es inherente al patrón (CSS no permite compartir un bloque entre un selector
+       de atributo y una media query), así que lo que la vigila es
+       src/tema-coherente.test.js, no la disciplina. */
+    --tinta: #e8eae6;
+    --gris: #a9ada8;
+    --gris-tenue: #757975;
+    --linea: #2c3530;
+    --fondo: #1a1f1c;
+    --tarjeta: #232b27;
+    --resaltado: #664d1a;
+    --verde-muy-claro: #1d3529;
+    --sent-positiva: #3fa874;
+    --sent-neutra: #3d4a43;
+    --sent-negativa: #d0654b;
+    --sent-mixta: #d9a84e;
+    --mapa-0: #3a352d;
+    --mapa-1: #26493a;
+    --mapa-2: #316548;
+    --mapa-3: #40895e;
+    --mapa-4: #57ae7a;
+    --mapa-5: #80d4a0;
+    --mapa-borde: #11150f;
+  }
+}
+
+/* ── Puerta de sesión ──────────────────────────────────────────────────────
+   Mismo lenguaje visual que el esqueleto inline de index.html, para que el
+   reemplazo del DOM cuando React monta no produzca salto. */
+.pantalla-sesion {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: var(--fondo);
+}
+
+.pantalla-sesion-marca {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--verde);
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.pantalla-sesion-titulo {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pantalla-sesion-detalle {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--gris);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pantalla-sesion-boton {
+  margin-top: 8px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--verde);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pantalla-sesion-boton:hover {
+  background: var(--verde-oscuro);
+}
+
+/* Identidad y salida, en la barra de navegación (fondo VERDE: los colores no
+   pueden salir de las variables de tema, que asumen fondo claro/oscuro neutro) */
+.barra-sesion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-left: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+/* Sirve tanto para el <Link> de Configuración como para el <button> de ingreso:
+   por eso fija background y cursor, que un <a> no necesita pero un <button> sí. */
+.barra-sesion-config {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.barra-sesion-config:hover,
+.barra-sesion-config.activo {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* En pantallas angostas se deja solo el engranaje: el texto es lo primero que
+   sobra, pero el acceso NO puede desaparecer (es donde vive la administración). */
+@media (max-width: 900px) {
+  .barra-sesion-config span,
+  .barra-sesion-usuario {
+    display: none;
+  }
+}
+
+.barra-sesion-rol {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+.barra-sesion-salir {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.barra-sesion-salir:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+
+/* ── Panel de conceptos (Configuración) ─────────────────────────────────── */
+.conceptos {
+  margin-top: 3rem;
+}
+
+.conceptos-ayuda {
+  color: var(--gris);
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 72ch;
+  margin: 0.5rem 0;
+}
+
+.conceptos-solo-lectura {
+  padding: 10px 12px;
+  border-left: 3px solid var(--linea);
+  background: var(--tarjeta);
+}
+
+.conceptos-aviso-critico {
+  padding: 10px 12px;
+  border-left: 3px solid #d9a84e;
+  background: var(--tarjeta);
+  font-size: 13px;
+  /* Era var(--texto), que NUNCA existió: la declaración es inválida y el color
+     heredaba en silencio. El token real del color de cuerpo es --tinta. */
+  color: var(--tinta);
+  max-width: 72ch;
+}
+
+.conceptos-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 1.25rem 0;
+}
+
+.conceptos-form input[type='text'] {
+  flex: 1 1 280px;
+  padding: 8px 12px;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background: var(--tarjeta);
+  color: inherit;
+  font-size: 14px;
+}
+
+.conceptos-form select {
+  padding: 8px 12px;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background: var(--tarjeta);
+  color: inherit;
+  font-size: 14px;
+}
+
+.conceptos-form button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--verde);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.conceptos-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.conceptos-error {
+  color: #b23b3b;
+  font-size: 13px;
+  max-width: 72ch;
+}
+
+.conceptos-ok {
+  color: var(--verde);
+  font-size: 13px;
+  max-width: 72ch;
+}
+
+.conceptos-columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.conceptos-columnas h3 {
+  font-size: 15px;
+  margin: 0 0 0.25rem;
+}
+
+.conceptos-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conceptos-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background: var(--tarjeta);
+}
+
+.conceptos-texto {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.conceptos-vacio {
+  color: var(--gris-tenue);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.conceptos-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--linea);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gris);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.conceptos-accion:hover:not(:disabled) {
+  border-color: var(--verde);
+  color: var(--verde);
+}
+
+.conceptos-accion:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.conceptos-accion-quitar:hover:not(:disabled) {
+  border-color: #b23b3b;
+  color: #b23b3b;
+}
+
+.conceptos-cuenta {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.conceptos-impacto {
+  margin-top: 2rem;
+  padding: 16px;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--tarjeta);
+}
+
+.conceptos-impacto h3 {
+  margin: 0 0 0.5rem;
+  font-size: 15px;
+}
+
+.conceptos-titulares {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conceptos-titulares li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.conceptos-titulares a {
+  color: var(--verde);
+}
+
+.conceptos-medio {
+  color: var(--gris-tenue);
+  font-size: 12px;
+}
+
+/* --- Móvil: defectos medidos con emulación de dispositivo real -----------------------
+
+   Advertencia de método: `chrome --headless --window-size=390,900` NO renderiza a 390 px
+   en Windows —la ventana no baja de ~500— y la captura sale RECORTADA. Eso hace ver
+   desbordes que no existen y esconde los que sí. Todo lo de abajo se midió con
+   `Emulation.setDeviceMetricsOverride` vía CDP, que sí fija el viewport. */
+
+/* Búsqueda avanzada. Antes: `gridTemplateColumns: '250px 1fr'` INLINE, sin breakpoint
+   posible. A 390 px el aside se llevaba 250 y los resultados quedaban en ~90 px: los
+   titulares se pintaban a UNA LETRA POR LÍNEA. Verificado en captura. */
+.vista-buscar {
+  padding: var(--pad-vista);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.buscar-disposicion {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 767.98px) {
+  .buscar-disposicion {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 559.98px) {
+  :root {
+    --pad-vista: 1.25rem 1rem 2rem;
+  }
+}
+
+/* Objetivos táctiles de 44 px (WCAG 2.5.5). Medidos a 390 px: 27 elementos por debajo,
+   entre ellos los enlaces de la barra (34x36), los chips del índice (alto 28) y los
+   botones de período (alto 32). Se crece por padding y min-height, sin agrandar la letra:
+   el objetivo es el área de toque, no el tamaño visual. */
+@media (pointer: coarse) {
+  .barra-enlace,
+  .barra-sesion-config,
+  .barra-sesion-salir,
+  .filtro-periodo-boton,
+  .indice-chip {
+    min-height: 44px;
+  }
+
+  /* min-width además de min-height: los enlaces de la barra en modo solo-icono medían
+     34x36, y 44 de alto con 34 de ancho sigue incumpliendo 2.5.5. */
+  .barra-enlace,
+  .barra-sesion-config,
+  .barra-sesion-salir {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .filtro-periodo-boton,
+  .indice-chip {
+    display: inline-flex;
+    align-items: center;
+  }
+}

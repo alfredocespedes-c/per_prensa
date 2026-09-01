@@ -1,0 +1,153 @@
+/* Mapa coroplético. Todo el color sale de tokens CSS, así que el cambio de tema
+   claro/oscuro no necesita nada de JavaScript. */
+
+.mapa-chile {
+  position: relative;
+}
+
+.mapa-chile-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  margin: 0 auto;
+}
+
+.mapa-region {
+  stroke: var(--mapa-borde);
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+  transition: fill 0.12s;
+}
+
+.mapa-region.n1 { fill: var(--mapa-1); }
+.mapa-region.n2 { fill: var(--mapa-2); }
+.mapa-region.n3 { fill: var(--mapa-3); }
+.mapa-region.n4 { fill: var(--mapa-4); }
+.mapa-region.n5 { fill: var(--mapa-5); }
+/* n0 (sin noticias) NO va acá: lleva la trama diagonal por atributo fill, con un id
+   único por instancia. Doble codificación (tono cálido + trama) para que se distinga
+   del nivel 1 aunque la región sea diminuta o el usuario no distinga verdes. */
+
+.mapa-trama-fondo { fill: var(--mapa-0); }
+.mapa-trama-linea { stroke: var(--gris-tenue); }
+
+.mapa-region[role='link'] {
+  cursor: pointer;
+}
+
+.mapa-region.encima {
+  stroke: var(--tinta);
+  stroke-width: 1.5;
+}
+
+.mapa-region:focus {
+  outline: none;
+}
+
+.mapa-region:focus-visible {
+  stroke: var(--tinta);
+  stroke-width: 2.5;
+}
+
+.mapa-region-resalte {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.mapa-banda-rotulo {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--gris-tenue);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mapa-numero {
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Los tres niveles claros llevan texto oscuro; los dos oscuros, claro. */
+.mapa-numero.n1,
+.mapa-numero.n2,
+.mapa-numero.n3 { fill: #0a3a22; }
+.mapa-numero.n4,
+.mapa-numero.n5 { fill: #ffffff; }
+
+[data-theme='oscuro'] .mapa-numero.n1,
+[data-theme='oscuro'] .mapa-numero.n2,
+[data-theme='oscuro'] .mapa-numero.n3 { fill: #e8f3ec; }
+[data-theme='oscuro'] .mapa-numero.n4,
+[data-theme='oscuro'] .mapa-numero.n5 { fill: #0d2318; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='claro']) .mapa-numero.n1,
+  :root:not([data-theme='claro']) .mapa-numero.n2,
+  :root:not([data-theme='claro']) .mapa-numero.n3 { fill: #e8f3ec; }
+  :root:not([data-theme='claro']) .mapa-numero.n4,
+  :root:not([data-theme='claro']) .mapa-numero.n5 { fill: #0d2318; }
+}
+
+.mapa-estado {
+  /* Alto fijo: reservar el espacio evita que el mapa salte al aparecer el texto. */
+  min-height: 1.5rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--tinta);
+  text-align: center;
+}
+
+.mapa-estado-vacio {
+  color: var(--gris-tenue);
+  font-size: 0.75rem;
+}
+
+/* ---- Leyenda ---- */
+
+.mapa-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--gris);
+}
+
+.mapa-leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mapa-leyenda-muestra {
+  width: 22px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--linea);
+}
+
+.mapa-leyenda-muestra.n0 {
+  background-color: var(--mapa-0);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--gris-tenue) 0 1px,
+    transparent 1px 5px
+  );
+}
+
+.mapa-leyenda-muestra.n1 { background: var(--mapa-1); }
+.mapa-leyenda-muestra.n2 { background: var(--mapa-2); }
+.mapa-leyenda-muestra.n3 { background: var(--mapa-3); }
+.mapa-leyenda-muestra.n4 { background: var(--mapa-4); }
+.mapa-leyenda-muestra.n5 { background: var(--mapa-5); }
+
+.mapa-nota {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--gris-tenue);
+}

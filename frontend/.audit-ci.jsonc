@@ -1,0 +1,13 @@
+{
+  // Gate de vulnerabilidades del CI (job frontend): bloquea high/critical en
+  // dependencias de producción. Ver .github/workflows/ci.yml.
+  "high": true,
+  "skip-dev": true,
+  "allowlist": [
+    // react-router / react-router-dom: CSRF en modo RSC (acciones de servidor).
+    // No aplica: este frontend es una SPA de Vite sin RSC ni acciones de
+    // servidor. El fix upstream está solo en react-router v8 (cambio mayor).
+    // Reevaluar al subir de major o si aparece parche en la línea 7.x.
+    "GHSA-qwww-vcr4-c8h2"
+  ]
+}

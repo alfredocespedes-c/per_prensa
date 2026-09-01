@@ -1,0 +1,13 @@
+# Rangos y no pines exactos: el lower bound es lo que garantiza el comportamiento del que
+# depende este código; el upper bound corta en el próximo major. Para reproducibilidad
+# estricta, congelar con `pip-compile` (ver README).
+google-api-python-client>=2.140,<3
+google-auth>=2.35,<3
+google-auth-httplib2>=0.2,<1
+python-dotenv>=1.0,<2
+# La base IANA como paquete: `zoneinfo` la usa como respaldo si la imagen no trae
+# /usr/share/zoneinfo. Así la zona horaria no depende de qué incluya la imagen base.
+tzdata>=2024.1
+
+# Escritura en la tabla boletines_contratados. Mismo driver que backend/.
+psycopg2-binary>=2.9,<3

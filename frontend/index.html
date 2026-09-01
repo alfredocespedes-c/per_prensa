@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Monitor de prensa de CONAF: últimas noticias de medios chilenos que mencionan a la Corporación Nacional Forestal."
+    />
+    <title>Monitor de Prensa CONAF</title>
+    <!-- El tema se resuelve ANTES de pintar. Tiene que ser un script clásico y
+         síncrono en el <head>: el módulo de main.jsx es diferido y correría después
+         del primer pintado, así que el esqueleto de abajo saldría en colores claros
+         y al montar React daría un destello blanco. Misma intención que el bloque de
+         tema de src/main.jsx, adelantada. -->
+    <script>
+      (function () {
+        try {
+          var tema =
+            localStorage.getItem('tema') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro')
+          document.documentElement.setAttribute('data-theme', tema)
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'claro')
+        }
+      })()
+    </script>
+    <!-- Inline: pinta antes de que estilos.css termine de bajar. Entre el primer byte
+         y createRoot() hay un blanco real, agravado por el React.lazy de las vistas;
+         "página en blanco" es uno de los cuatro errores inaceptables de SECOM. -->
+    <style>
+      #root .cargando-inicial {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f5f7f6;
+      }
+      #root .cargando-marca {
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 13px;
+        color: #05833f;
+      }
+      #root .cargando-texto {
+        font-size: 14px;
+        color: #5b6560;
+      }
+      [data-theme='oscuro'] #root .cargando-inicial { background: #1a1f1c; }
+      [data-theme='oscuro'] #root .cargando-marca { color: #4fae7c; }
+      [data-theme='oscuro'] #root .cargando-texto { color: #a9ada8; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="cargando-inicial">
+        <div class="cargando-marca">COIPO · Monitor de Prensa</div>
+        <div class="cargando-texto">Verificando sesión…</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

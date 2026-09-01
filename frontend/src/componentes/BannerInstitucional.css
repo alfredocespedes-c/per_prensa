@@ -1,0 +1,148 @@
+/* Banner institucional CONAF + UIA + SECOM, con el título del boletín superpuesto.
+
+   PROPORCIÓN NATURAL, CON PISO DE ALTURA. Sin recorte vertical, sin deformación, sin
+   factores medidos a mano: la composición entera —filete azul+rojo, marca y remate orgánico
+   del borde derecho— se ve completa en cualquier ancho de escritorio.
+
+   Esto sólo es viable porque el asset es un banner de cabecera (17,1299:1) y no un membrete
+   de documento (10,42:1). A proporción natural aquel daba 131 px de alto a 1366 y 184 a
+   1920 —maximizar la ventana para ver más noticias daba más banner—; este da 80 y 112.
+
+   El piso existe porque la proporción natural sola no sirve en móvil: a 390 px de ancho el
+   banner mediría 22 px de alto y la marca sería ilegible. Forzando un ANCHO mínimo de imagen
+   (68 × 17,1299 = 1165 px) la altura nunca baja de 68 px; lo que sobra lo recorta el
+   contenedor por la derecha.
+
+   MEDIDAS DEL ASSET LARGO (banner-secom.jpg, 3032 × 177). Si el asset cambia, volver a
+   medirlas:
+     · marca + bloque SECOM ....... hasta x = 745   (24,6 % izquierdo)
+     · campo plano #064928 ........ x 850 – 2745    (zona segura para cortar y para el texto)
+     · remate decorativo .......... desde x ≈ 2821
+   El recorte por la derecha cae dentro del tramo uniforme #064928 en todo ancho realista,
+   así que no deja costura ni franja bitono. */
+
+.banner-institucional {
+  /* 3032/177. Único número derivado del asset: si el asset cambia, cambia aquí. */
+  --razon-banner: 17.1299;
+  /* Altura mínima de la marca legible. Verificada mirando capturas, no calculada. */
+  --alto-minimo: 68px;
+  /* Fin de la marca en el asset largo, en porcentaje: 745/3032. El overlay del título
+     nunca puede empezar antes de aquí — superponer texto sobre la marca es una de las
+     prohibiciones duras de INSUMO_GRAFICO/implementacion_banner.md §9. */
+  --fin-marca: 24.6%;
+  /* Se ve mientras la imagen decodifica y si la imagen falla; también rellena el borde
+     derecho cuando el asset corto no cubre el ancho. Es el verde del campo principal. */
+  background: var(--color-institucional);
+  /* NO es sticky a propósito: la barra de navegación ya lo es. Dos elementos fijos se
+     comerían ~160 px permanentes de una herramienta que SECOM escanea a las 8:00. */
+  overflow: hidden;
+  line-height: 0;
+  position: relative;
+}
+
+.banner-enlace {
+  display: block;
+}
+
+.banner-institucional .banner-imagen {
+  display: block;
+  /* Por debajo de 1165 px de ancho la imagen deja de encoger y empieza a desbordar por la
+     derecha, que es lo que recorta el `overflow: hidden` del contenedor. Nunca hay
+     `object-fit`, así que el filete superior no se puede amputar en ningún ancho. */
+  width: max(100%, calc(var(--alto-minimo) * var(--razon-banner)));
+  height: auto;
+}
+
+/* --- Título superpuesto -------------------------------------------------------------
+
+   Va sobre el campo plano #064928, a la derecha de la marca. Blanco sobre ese verde da
+   10,55:1 (AAA), muy por encima del 4,5:1 que exige WCAG 1.4.3.
+
+   `pointer-events: none` para que no le robe el clic al enlace que envuelve el banner:
+   visualmente está encima, pero el clic atraviesa. */
+.banner-titulo {
+  position: absolute;
+  inset-block: 0;
+  /* --fin-marca es el borde EXACTO de la marca; el padding es el aire que la separa del
+     título. Sin él, «Monitor de Prensa CONAF» queda pegado a la palabra «SECOM». */
+  inset-inline-start: var(--fin-marca);
+  inset-inline-end: 1rem;
+  padding-inline-start: clamp(12px, 1.6vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.25;
+  color: #fff;
+  pointer-events: none;
+}
+
+.banner-titulo-nombre {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.35vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  /* El campo plano termina en el remate decorativo; si el título fuese larguísimo, se
+     corta antes de invadirlo en vez de desbordar sobre el verde claro (donde el blanco
+     daría 3,88:1 y dejaría de cumplir AA). */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.banner-titulo-meta {
+  margin: 0;
+  font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+  font-weight: 400;
+  opacity: 0.92;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.banner-titulo-sep {
+  opacity: 0.6;
+}
+
+/* --- Móvil: asset corto y título en su propia franja ---------------------------------
+
+   Bajo 560 px el overlay NO CABE, y no es una opinión: a 390 px el asset largo muestra las
+   columnas 0–1015 de 3032 y la marca ocupa hasta 745, así que quedan ~63 px de campo plano.
+   El <picture> del componente sirve aquí el asset corto (875 × 177 = 4,9435:1), que muestra
+   la marca y el bloque SECOM COMPLETOS — algo que con el asset largo hoy no ocurre.
+
+   El corto se ancla a la izquierda con altura fija y el contenedor pinta el resto de
+   #064928. Como el asset TERMINA en ese mismo verde, la unión es invisible.
+   A 68 px de alto mide 336 px de ancho: cabe entero desde 336 px de viewport. */
+@media (max-width: 559.98px) {
+  .banner-institucional .banner-imagen {
+    width: auto;
+    height: var(--alto-minimo);
+  }
+
+  .banner-titulo {
+    position: static;
+    padding: 10px 16px 12px;
+    gap: 1px;
+    background: var(--color-institucional);
+  }
+
+  .banner-titulo-nombre {
+    font-size: 1rem;
+    white-space: normal;
+  }
+
+  .banner-titulo-meta {
+    font-size: 0.72rem;
+    white-space: normal;
+  }
+}
+
+/* Blanco y no --color-acento: #5e8f19 sobre #064928 da 2,72:1, bajo el 3:1 que exige
+   WCAG 1.4.11, y como el offset es negativo el anillo se dibuja DENTRO de la imagen,
+   donde en tramos cruza píxeles que son exactamente #5e8f19 (contraste 1:1, invisible).
+   Blanco da 10,55:1 sobre #064928 y 14,27:1 sobre #15301d. */
+.banner-enlace:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+}
