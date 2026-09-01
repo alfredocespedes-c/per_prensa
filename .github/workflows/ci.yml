@@ -1,12 +1,8 @@
-# CI + gate de deploy (SEC-10, SEC-14).
+# CI del repositorio personal per_prensa.
 #
-# Todos los pushes y PRs corren tests, lint, build y auditoría de dependencias.
-# El deploy a producción SOLO ocurre en push a main y SOLO si los 4 jobs de
-# verificación están en verde: si algo falla, producción conserva la versión
-# anterior (mismo criterio del boletín: nunca desplegar algo roto).
-#
-# Todas las actions y el workflow reusable van fijados a SHA inmutable
-# (dependabot los mantiene, ver .github/dependabot.yml).
+# Todos los pushes y PRs validan collector, frontend, backend y Docker.
+# El despliegue público del frontend se gestiona de forma independiente en
+# .github/workflows/pages.yml mediante GitHub Pages.
 name: CI
 
 on:
@@ -17,8 +13,6 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  # En PRs, un push nuevo cancela la corrida anterior. En main nunca se
-  # cancela: un deploy a medias no debe interrumpirse.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -49,9 +43,6 @@ jobs:
     permissions:
       contents: read
     steps:
-      # fetch-depth: 0 no hace falta: la guarda mira el ÁRBOL versionado (git ls-files),
-      # no el historial. Lo que ya está en la historia no lo arregla el CI — exige
-      # reescribirla— y por eso esta guarda es preventiva: impide que entre más.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -79,8 +70,6 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      # audit-ci en vez de npm audit: permite allowlist con justificación
-      # (ver frontend/.audit-ci.jsonc) sin dejar de bloquear high/critical.
       - run: npx audit-ci --config .audit-ci.jsonc
 
   backend:
@@ -114,22 +103,4 @@ jobs:
         imagen: [backend, collector, frontend]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Mismo contexto raíz que docker-compose.yml; no depende de .env porque
-      # env_file es de runtime, no de build.
       - run: docker build -f ${{ matrix.imagen }}/Dockerfile .
-
-  deploy:
-    name: Deploy prod
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    # `contenido` entra a la compuerta: si se coló contenido de prensa real al árbol
-    # versionado, no se despliega. No es una comprobación cosmética — el repositorio está
-    # pensado para publicarse y lo que entra al historial no sale.
-    needs: [collector, frontend, backend, docker, contenido]
-    permissions:
-      contents: read
-    # SEC-10: fijado al SHA de main de infra-docker-base (2026-08-04). El
-    # reusable solo hace checkout + rsync + docker compose en el runner
-    # self-hosted, por eso basta contents: read.
-    uses: Sud-Austral/infra-docker-base/.github/workflows/deploy.yml@db5f79c570382be5daac2ea96f21eca8043c374b # main 2026-08-04
-    with:
-      app_name: ${{ github.event.repository.name }}
