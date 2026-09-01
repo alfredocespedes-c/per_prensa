@@ -1,0 +1,27 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# Artefactos del collector. NUNCA versionar: son noticias reales y todo lo que
+# quede acá termina servido por nginx en /data/ (location / -> try_files), es decir
+# accesible sin pasar por el login. Ver frontend/nginx.conf y .dockerignore.
+frontend/public/data/
+datos/
+
+# Insumo crudo del mapa: 83 MB de polígonos a resolución completa. Es la ENTRADA de
+# scripts/generar-geo-regiones.mjs, no un artefacto versionable; lo que se commitea
+# es la salida, frontend/public/geo/regiones-chile.v1.json (~300 KB).
+# Con *.json y no el directorio, para no ignorar banner.md ni banner3.jpg.
+INSUMO_GRAFICO/*.json
+
+# Credenciales de conexión (Postgres, etc.) — ver .env.example
+.env
+.env.dev
+.env.*.local
+
+# Backend Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend.zip
